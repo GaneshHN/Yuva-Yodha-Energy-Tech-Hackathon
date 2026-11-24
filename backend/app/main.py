@@ -7,7 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.routes import (
@@ -92,7 +92,11 @@ class RequestSizeLimitMiddleware:
         await response(scope, receive, send)
 
 
-app = FastAPI(title="EnerPilot API", version="1.0.0")
+app = FastAPI(
+    title="EnerPilot API",
+    version="1.0.0",
+    swagger_ui_parameters={"deepLinking": False},
+)
 settings = get_settings()
 
 app.add_middleware(RequestSizeLimitMiddleware, max_bytes=settings.max_request_bytes)
@@ -257,6 +261,11 @@ async def unhandled_error_handler(request: Request, exc: Exception):
         status_code=500,
         content={"success": False, "error": {"code": "INTERNAL_SERVER_ERROR", "message": "An unexpected error occurred"}},
     )
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    return RedirectResponse(url="/docs", status_code=307)
 
 
 @app.get("/health", tags=["health"], summary="Liveness check")
