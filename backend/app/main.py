@@ -92,7 +92,11 @@ class RequestSizeLimitMiddleware:
         await response(scope, receive, send)
 
 
-app = FastAPI(title="EnerPilot API", version="1.0.0")
+app = FastAPI(
+    title="EnerPilot API",
+    version="1.0.0",
+    swagger_ui_parameters={"deepLinking": False},
+)
 settings = get_settings()
 
 app.add_middleware(RequestSizeLimitMiddleware, max_bytes=settings.max_request_bytes)
