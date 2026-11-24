@@ -7,7 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.routes import (
@@ -257,6 +257,11 @@ async def unhandled_error_handler(request: Request, exc: Exception):
         status_code=500,
         content={"success": False, "error": {"code": "INTERNAL_SERVER_ERROR", "message": "An unexpected error occurred"}},
     )
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    return RedirectResponse(url="/docs", status_code=307)
 
 
 @app.get("/health", tags=["health"], summary="Liveness check")
